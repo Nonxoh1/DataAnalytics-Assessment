@@ -1,72 +1,66 @@
-
 # DataAnalytics-Assessment
 
-This repository contains SQL solutions for a Data Analyst technical assessment focused on customer transaction insights and account behaviors.
+Hi there — this project includes my SQL solutions for a Data Analyst assessment. The goal was to analyze customer behaviors using real-world banking data and come up with useful insights.
+
+Each question focused on a practical business case, and I’ve included one clean SQL query per task with comments where needed. Below is a quick summary of how I approached each one, along with any challenges I faced.
 
 ---
 
-## ✅ Assessment Questions & Solutions
+## Q1: High-Value Customers with Multiple Products
 
-### Q1: High-Value Customers with Multiple Products
-**Goal:** Identify users with both a funded savings plan and a funded investment plan, sorted by total deposits.
+**What it does:**  
+Finds customers who have both a savings plan and an investment plan — and shows how much they've deposited in total.
 
-**Approach:**
-- Joined `users_customuser`, `savings_savingsaccount`, and `plans_plan`.
-- Counted distinct savings and investment plans per user.
-- Filtered for users having both.
-- Summed total confirmed deposits (`confirmed_amount`).
+**How I approached it:**  
+I joined the user, savings, and plan tables, then filtered for deposits that were actually funded (`confirmed_amount > 0`).  
+I used conditional counts to check if a customer had at least one savings plan and one investment plan. I also summed their deposits and sorted by total amount saved.
 
-**Challenge:** Interpreting "funded" was handled by using `confirmed_amount > 0`.
-
----
-
-### Q2: Transaction Frequency Analysis
-**Goal:** Classify users into High, Medium, or Low frequency based on average transactions per month.
-
-**Approach:**
-- Counted all savings transactions per user.
-- Computed active duration using difference between first and last transaction.
-- Grouped users by average monthly frequency into categories.
-
-**Challenge:** Edge case of `0 months` handled to avoid divide-by-zero errors.
+**Challenge:**  
+The challenge here was understanding what “funded” meant in this context. I assumed it referred to transactions where `confirmed_amount > 0`, which seemed to make the most business sense.
 
 ---
 
-### Q3: Account Inactivity Alert
-**Goal:** Flag savings or investment plans with no inflow in the last 365 days.
+## Q2: Transaction Frequency Analysis
 
-**Approach:**
-- Originally planned to join with `plans_plan`, but the dataset lacked labeled savings/investment plans.
-- Instead, worked directly with `savings_savingsaccount` and grouped by `plan_id` and `owner_id`.
-- Calculated last inflow date and number of days since.
-- Marked plan `type` as `'Unknown'` since plan type wasn't derivable from data.
+**What it does:**  
+Groups users by how often they make deposits each month — categorized into High, Medium, or Low frequency.
 
-**Challenge:** Adjusted logic after finding `plans_plan` contained no active or labeled plan records.
+**How I approached it:**  
+I counted how many transactions each user made and calculated how many months they were active based on their first and last deposit dates.  
+Then I calculated their average transactions per month and grouped them using case logic (≥10 = High, 3–9 = Medium, ≤2 = Low).  
+Finally, I grouped the results to show how many users fall into each category.
 
----
-
-### Q4: Customer Lifetime Value (CLV) Estimation
-**Goal:** Estimate CLV using tenure and transaction volume.
-
-**Approach:**
-- Tenure: `TIMESTAMPDIFF(MONTH, signup_date, today)`
-- Profit per transaction = 0.1% of confirmed amount
-- Applied given formula to calculate estimated CLV.
-- Ordered customers by highest CLV.
-
-**Challenge:** Excluded users with 0-month tenure to avoid invalid math.
+**Challenge:**  
+One tricky part was making sure I didn’t divide by zero when calculating average per month — for users who might have only deposited once. I used a fallback to handle that safely.
 
 ---
 
-## 🗂️ File Structure
+## Q3: Account Inactivity Alert
 
-```
-DataAnalytics-Assessment/
-├── Assessment_Q1.sql
-├── Assessment_Q2.sql
-├── Assessment_Q3.sql
-├── Assessment_Q4.sql
-└── README.md
-```
+**What it does:**  
+Flags any savings or investment plan that hasn't had a deposit in over a year, even though the plan is still active.
 
-Each SQL file contains a single query for the respective assessment question with proper formatting and comments.
+**How I approached it:**  
+I joined the savings transactions with their respective plans and found the most recent deposit date for each.  
+If it’s been more than 365 days since the last deposit, I considered the plan inactive.  
+I labeled each plan as either “Savings” or “Investment” based on its attributes so the team knows how to handle them.
+
+**Challenge:**  
+There were a lot of fields in the plans table, and understanding which ones meant “active” or which type of plan it was took a bit of digging. I had to rely on `is_regular_savings` and `is_a_fund` as flags.
+
+---
+
+## Q4: Customer Lifetime Value (CLV)
+
+**What it does:**  
+Estimates how valuable each customer is over time using a simplified CLV formula.
+
+**How I approached it:**  
+I calculated each customer's tenure in months from their signup date.  
+Then I counted how many deposits they’ve made and computed the average profit per transaction (using 0.1% of the deposit amount).  
+I plugged everything into the formula and sorted the results by estimated CLV.
+
+**Challenge:**  
+The formula required dividing by tenure, so I had to make sure customers with 0-month tenure (like same-month signups) didn’t break the calculation. I added a condition to avoid division errors.
+
+
