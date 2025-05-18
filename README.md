@@ -1,6 +1,7 @@
 # DataAnalytics-Assessment
 
-Hi there — this project includes my SQL solutions for a Data Analyst assessment. The goal was to analyze customer behaviors using real-world banking data and come up with useful insights.
+Hi there
+This project includes my SQL solutions for a Data Analyst assessment. The goal was to analyze customer behaviors using real-world banking data and come up with useful insights.
 
 Each question focused on a practical business case, and I’ve included one clean SQL query per task with comments where needed. Below is a quick summary of how I approached each one, along with any challenges I faced.
 
@@ -62,5 +63,7 @@ I plugged everything into the formula and sorted the results by estimated CLV.
 
 **Challenge:**  
 The formula required dividing by tenure, so I had to make sure customers with 0-month tenure (like same-month signups) didn’t break the calculation. I added a condition to avoid division errors.
+
+I know some of my queries where a bit long, but it was how i could achieve the result.
 
 
